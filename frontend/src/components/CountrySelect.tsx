@@ -12,13 +12,14 @@ export default function CountrySelect({
   onChange: (v: string[]) => void;
 }) {
   return (
+    /* Native <select multiple> preserved for E2E: role="listbox" */
     <select
       multiple
       value={value}
       onChange={(e) =>
         onChange(Array.from(e.target.selectedOptions, (o) => o.value))
       }
-      style={{ minWidth: 220, minHeight: 140 }}
+      className="w-full min-h-[140px] rounded-md border border-slate-200 bg-white px-2 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       {ALL.map(([code, name]) => (
         <option key={code} value={code}>
