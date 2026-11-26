@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     keitaro_group_id: int = 10332
     keitaro_source_id: int = 836
     cors_origins: str = "http://localhost:5173,http://localhost:4173"
+    use_fake_keitaro: bool = False
 
     @property
     def cors_origin_list(self) -> list[str]:
