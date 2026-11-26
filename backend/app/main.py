@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -6,7 +8,16 @@ from app.core.config import settings
 from app.core.errors import AppError
 from app.api import campaigns, streams, offers
 
-app = FastAPI(title="Adrobot")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.use_fake_keitaro:
+        from app.core.db import Base, engine
+        Base.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(title="Adrobot", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
