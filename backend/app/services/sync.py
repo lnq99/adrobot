@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.keitaro.base import KeitaroPort
+from app.services.editor import rebalance_stream
 from app.services.signature import stream_signature
 from app import models
 
@@ -27,12 +28,19 @@ async def fetch_campaign(db: Session, keitaro: KeitaroPort,
         known = {o.keitaro_offer_id: o for o in local.offers}
 
         # reverse-sync: offers we knew but are gone upstream -> REM (unless already removed)
+        any_rem = False
         for oid, o in known.items():
             if o.status == "active" and oid not in upstream_ids:
                 o.status = "removed"
                 o.origin = "keitaro"
                 o.pinned = False
                 o.share = 0
+                any_rem = True
+
+        # if any offer was flipped to REM, rebalance so active offers still total 100
+        if any_rem:
+            rebalance_stream(local)
+            local.is_dirty = True
 
     db.commit()
     return campaign
