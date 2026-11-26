@@ -10,7 +10,8 @@ constructor), built for the Adrobot test task. Two parts:
    recalculation, draft/publish (push/cancel), archive, bring-back,
    reverse-sync (REM), and pinned weights.
 
-> Target stack: **FastAPI + SQLAlchemy + Alembic**. Frontend TBD.
+> Stack: **FastAPI + SQLAlchemy 2.0 + Alembic + Postgres** backend;
+> **React + TypeScript (Vite)** SPA frontend.
 
 ## Status
 
@@ -25,9 +26,8 @@ Frontend: React + TypeScript SPA (Vite), deployed to GitHub Pages.
 | [`docs/api-reference.md`](./docs/api-reference.md) | **Verified** test-stand API reference |
 | [`docs/test-stand-ru.md`](./docs/test-stand-ru.md) | Test-stand (emulator) access notes |
 | [`docs/admin-api.openapi.json`](./docs/admin-api.openapi.json) | Keitaro Admin API OpenAPI spec |
-
-The spec and implementation plan will be added under
-[`docs/superpowers/`](./docs/superpowers) during brainstorming.
+| [`docs/superpowers/specs/2026-11-26-adrobot-design.md`](./docs/superpowers/specs/2026-11-26-adrobot-design.md) | Design spec |
+| [`docs/superpowers/plans/2026-11-26-adrobot-implementation.md`](./docs/superpowers/plans/2026-11-26-adrobot-implementation.md) | TDD implementation plan |
 
 ## Run
 
