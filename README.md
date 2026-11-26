@@ -14,9 +14,8 @@ constructor), built for the Adrobot test task. Two parts:
 
 ## Status
 
-🚧 Pre-implementation. Requirements and design live in [`docs/`](./docs); the
-spec and implementation plan are being produced via a brainstorming workflow and
-will land in [`docs/superpowers/`](./docs/superpowers).
+Implemented. Backend: FastAPI + SQLAlchemy + Alembic, 29 service/API tests all green.
+Frontend: React + TypeScript SPA (Vite), deployed to GitHub Pages.
 
 ## Docs
 
@@ -30,29 +29,48 @@ will land in [`docs/superpowers/`](./docs/superpowers).
 The spec and implementation plan will be added under
 [`docs/superpowers/`](./docs/superpowers) during brainstorming.
 
-## Setup
+## Run
+
+### 1. Database (Postgres via Docker)
 
 ```bash
-cp .env.example .env     # then paste your Api-Key
+docker compose up -d
 ```
 
-## Test the stand
+> If local port 5432 is taken, set `PG_PORT` in `docker-compose.yml` and update
+> `DATABASE_URL` in `backend/.env` to match.
 
-`scripts/kt.sh` is a smoke-test client for the Keitaro emulator (reads the key
-from `.env`):
+### 2. Backend
 
 ```bash
-./scripts/kt.sh offers 5
-./scripts/kt.sh walkthrough <surname> GM 18001   # create → fetch → cleanup
+cd backend
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env            # paste your Keitaro Api-Key
+alembic upgrade head            # run migrations
+uvicorn app.main:app --reload   # http://localhost:8000
 ```
 
-## Run (to be filled during implementation)
+### 3. Frontend
 
 ```bash
-# alembic upgrade head
-# uvicorn app.main:app --reload
-# pytest
+cd frontend
+npm install
+cp .env.example .env            # VITE_API_URL=http://localhost:8000
+npm run dev                     # http://localhost:5173
 ```
+
+### Tests
+
+```bash
+cd backend && . .venv/bin/activate && pytest
+```
+
+## Part 1 / Part 2
+
+- **Create** tab: name + countries + offer → campaign with 2 streams (geo→Google, offer).
+- **Editor** tab: pick a campaign → Fetch Streams → add/remove/pin offers,
+  Push/Cancel. Yellow = unpublished; gray = removed (REM badge = deleted in Keitaro).
 
 ## How AI agents were used
 
