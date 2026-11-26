@@ -44,6 +44,21 @@ async def test_bring_back_reactivates(db, keitaro):
 
 
 @pytest.mark.asyncio
+async def test_add_offer_refreshes_name_on_reactivation(db, keitaro):
+    """Re-adding a removed offer must update offer_name to the new name."""
+    _, stream = await _campaign_with_offers_stream(db, keitaro)
+    editor.add_offer(db, stream, offer_id=18002, offer_name="OldName")
+    editor.remove_offer(db, stream, offer_id=18002)
+    # Re-add with a new name
+    editor.add_offer(db, stream, offer_id=18002, offer_name="NewName")
+    reactivated = next(o for o in stream.offers if o.keitaro_offer_id == 18002)
+    assert reactivated.status == "active"
+    assert reactivated.offer_name == "NewName", (
+        f"expected offer_name='NewName', got '{reactivated.offer_name}'"
+    )
+
+
+@pytest.mark.asyncio
 async def test_pin_sets_value_and_dirties_only_on_value(db, keitaro):
     _, stream = await _campaign_with_offers_stream(db, keitaro)
     editor.add_offer(db, stream, offer_id=18002, offer_name="B")

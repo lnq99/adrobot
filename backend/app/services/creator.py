@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.errors import ValidationError
 from app.keitaro.base import KeitaroPort
+from app.services.signature import stream_signature
 from app import models
 
 
@@ -53,7 +54,8 @@ async def create_campaign(db: Session, keitaro: KeitaroPort, *,
     campaign.streams.append(models.Stream(
         keitaro_stream_id=s1.id, position=s1.position, kind="opaque"))
     offers_stream = models.Stream(
-        keitaro_stream_id=s2.id, position=s2.position, kind="offers")
+        keitaro_stream_id=s2.id, position=s2.position, kind="offers",
+        keitaro_signature=stream_signature(s2))
     offers_stream.offers.append(models.OfferState(
         keitaro_offer_id=offer_id, share=100, status="active",
         published_share=100))
