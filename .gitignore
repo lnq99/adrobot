@@ -32,3 +32,6 @@ build/
 
 # Local dev smoke-test tool — not part of the deliverable
 scripts/kt.sh
+
+# Local docker overrides
+docker-compose.override.yml

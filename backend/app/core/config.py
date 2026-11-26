@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     keitaro_api_key: str = "test-key"
     keitaro_base_url: str = "https://keitaro-for-tests.etolegko.com/admin_api/v1"
-    database_url: str = "postgresql+psycopg://adrobot:adrobot@localhost:5434/adrobot"
+    database_url: str = "postgresql+psycopg://adrobot:adrobot@localhost:5432/adrobot"
     keitaro_domain_id: int = 1813
     keitaro_group_id: int = 10332
     keitaro_source_id: int = 836
