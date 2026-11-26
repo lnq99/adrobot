@@ -1,4 +1,21 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+// Injects a fixed on-screen caption banner into the page so the recorded
+// video narrates what is happening in each step.
+async function caption(page: Page, text: string) {
+  await page.evaluate((t) => {
+    let el = document.getElementById("e2e-caption");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "e2e-caption";
+      el.style.cssText =
+        "position:fixed;left:0;right:0;bottom:0;z-index:99999;padding:14px 20px;" +
+        "background:rgba(17,17,17,.9);color:#fff;font:600 18px system-ui;text-align:center";
+      document.body.appendChild(el);
+    }
+    el.textContent = t;
+  }, text);
+}
 
 // End-to-end browser test of the full Part 1 + Part 2 flow, driven through the
 // real SPA against a demo backend (FakeKeitaro + SQLite, USE_FAKE_KEITARO=1).
@@ -7,6 +24,8 @@ test("create campaign and edit stream offers", async ({ page }) => {
   // ── Part 1: Create tab ──────────────────────────────────────────────────────
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Create campaign" })).toBeVisible();
+
+  await caption(page, "Part 1 — Create a campaign: name, target country, and an offer");
 
   // Name
   await page.getByRole("textbox", { name: "Name", exact: true }).fill("e2e_test_campaign");
@@ -27,11 +46,15 @@ test("create campaign and edit stream offers", async ({ page }) => {
   // Submit (the second "Create" — the first is the tab button)
   await page.getByRole("button", { name: "Create" }).nth(1).click();
   await expect(page.getByText(/Created campaign #\d+/)).toBeVisible({ timeout: 10_000 });
+
+  await caption(page, "Keitaro campaign created with 2 streams (geo→Google + offer)");
   await page.waitForTimeout(1200); // let the success message read on-camera
 
   // ── Part 2: Editor tab ──────────────────────────────────────────────────────
   await page.getByRole("button", { name: "Editor" }).click();
   await expect(page.getByRole("heading", { name: "Editor" })).toBeVisible();
+
+  await caption(page, "Part 2 — Editor: selecting the campaign and fetching its streams");
 
   // Campaign dropdown: option 0 is the "pick a campaign" placeholder, so the
   // first real campaign is index 1.
@@ -52,6 +75,8 @@ test("create campaign and edit stream offers", async ({ page }) => {
     .filter({ has: page.getByRole("button", { name: "Push to Keitaro" }) })
     .first();
 
+  await caption(page, "Part 2 — Editor: add a 2nd offer → weights auto-rebalance to 50/50");
+
   // Add a second offer (18002) → shares rebalance to 50/50
   await streamCard.getByPlaceholder("offer id or name").fill("18002");
   await streamCard.getByRole("button", { name: "Search" }).click();
@@ -67,6 +92,8 @@ test("create campaign and edit stream offers", async ({ page }) => {
   await expect(shareCells.first()).toContainText("50%");
   await page.waitForTimeout(1500); // linger on the 50/50 rebalance
 
+  await caption(page, "Pin offer 18001 at 40% → the rest fills to 100%");
+
   // Pin offer 18001 and set its share to 40 (others fill the rest)
   await streamCard
     .getByRole("row")
@@ -81,6 +108,8 @@ test("create campaign and edit stream offers", async ({ page }) => {
   await pinInput.fill("40");
   await pinInput.dispatchEvent("change");
   await page.waitForTimeout(1500); // show the pinned 40 / rebalanced split
+
+  await caption(page, "Push to Keitaro → draft published (no longer 'unpublished')");
 
   // Push → stream is no longer unpublished
   await streamCard.getByRole("button", { name: "Push to Keitaro" }).click();
