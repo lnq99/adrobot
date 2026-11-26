@@ -1,0 +1,34 @@
+# Secrets — NEVER commit the real key
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Databases
+*.db
+*.sqlite3
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+.idea/
+*.swp
+
+# Claude Code local state
+.claude/
+
+# Local dev smoke-test tool — not part of the deliverable
+scripts/kt.sh
