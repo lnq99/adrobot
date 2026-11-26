@@ -24,7 +24,8 @@ def _validate_geos(geos: list[str]) -> list[str]:
 async def create_campaign(db: Session, keitaro: KeitaroPort, *,
                           name: str, geos: list[str], offer_id: int) -> models.Campaign:
     geos = _validate_geos(geos)
-    if await keitaro.get_offer(offer_id) is None:
+    offer = await keitaro.get_offer(offer_id)
+    if offer is None:
         raise ValidationError(f"offer {offer_id} not found in Keitaro")
 
     kcamp = await keitaro.create_campaign(
@@ -57,8 +58,8 @@ async def create_campaign(db: Session, keitaro: KeitaroPort, *,
         keitaro_stream_id=s2.id, position=s2.position, kind="offers",
         keitaro_signature=stream_signature(s2))
     offers_stream.offers.append(models.OfferState(
-        keitaro_offer_id=offer_id, share=100, status="active",
-        published_share=100))
+        keitaro_offer_id=offer_id, offer_name=offer.get("name", ""),
+        share=100, status="active", published_share=100))
     campaign.streams.append(offers_stream)
     db.commit()
     return campaign
