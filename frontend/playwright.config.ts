@@ -2,9 +2,18 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  // Slow the browser down so the recorded video is watchable as a demo.
+  // Override for fast runs with E2E_SLOWMO=0.
   use: {
     baseURL: "http://localhost:4173",
-    video: "on",
+    viewport: { width: 1280, height: 720 },
+    video: {
+      mode: "on",
+      size: { width: 1280, height: 720 },
+    },
+    launchOptions: {
+      slowMo: Number(process.env.E2E_SLOWMO ?? 650),
+    },
     trace: "on-first-retry",
   },
   webServer: [

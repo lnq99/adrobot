@@ -27,6 +27,7 @@ test("create campaign and edit stream offers", async ({ page }) => {
   // Submit (the second "Create" — the first is the tab button)
   await page.getByRole("button", { name: "Create" }).nth(1).click();
   await expect(page.getByText(/Created campaign #\d+/)).toBeVisible({ timeout: 10_000 });
+  await page.waitForTimeout(1200); // let the success message read on-camera
 
   // ── Part 2: Editor tab ──────────────────────────────────────────────────────
   await page.getByRole("button", { name: "Editor" }).click();
@@ -64,6 +65,7 @@ test("create campaign and edit stream offers", async ({ page }) => {
   await expect(streamCard.getByText("Total: 100%")).toBeVisible();
   const shareCells = streamCard.locator("tbody td").filter({ hasText: /^\d+%$/ });
   await expect(shareCells.first()).toContainText("50%");
+  await page.waitForTimeout(1500); // linger on the 50/50 rebalance
 
   // Pin offer 18001 and set its share to 40 (others fill the rest)
   await streamCard
@@ -78,8 +80,10 @@ test("create campaign and edit stream offers", async ({ page }) => {
   await expect(pinInput).toBeVisible();
   await pinInput.fill("40");
   await pinInput.dispatchEvent("change");
+  await page.waitForTimeout(1500); // show the pinned 40 / rebalanced split
 
   // Push → stream is no longer unpublished
   await streamCard.getByRole("button", { name: "Push to Keitaro" }).click();
   await expect(streamCard.getByText("(unpublished)")).not.toBeVisible({ timeout: 5_000 });
+  await page.waitForTimeout(1500); // hold on the published (not-yellow) end state
 });
