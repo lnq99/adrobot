@@ -1,80 +1,83 @@
-# Adrobot — Keitaro API wrapper
+# Adrobot — обёртка над API Keitaro
 
-A wrapper around the [Keitaro](https://keitaro.io/) Admin API (ad-tracker / link
-constructor), built for the Adrobot test task. Two parts:
+Обёртка над Admin API [Keitaro](https://keitaro.io/) (трекер / конструктор
+ссылок), сделанная для тестового задания Adrobot. Две части:
 
-1. **Campaign creator** — given `name`, `geo_code`, `offer_id`, create a campaign
-   with two streams (geo → Google, and the chosen offer), using a configured
-   domain / group / source.
-2. **Campaign editor** — add/remove offers in an existing campaign with weight
-   recalculation, draft/publish (push/cancel), archive, bring-back,
-   reverse-sync (offers removed in Keitaro), and pinned weights.
+1. **Создание кампании** — по `name`, `geo_code`, `offer_id` создаёт кампанию
+   с двумя потоками (гео → Google и выбранный оффер), используя заранее
+   настроенные домен / группу / источник.
+2. **Редактор кампании** — добавление/удаление офферов в существующей кампании
+   с пересчётом долей, черновик/публикация (push/cancel), архив, возврат
+   (bring-back), обратная синхронизация (офферы, удалённые в Keitaro) и
+   закреплённые доли (pinned weights).
 
-> Stack: **FastAPI + SQLAlchemy 2.0 + Alembic + Postgres** backend;
-> **React + TypeScript (Vite)** SPA frontend.
+> Стек: бэкенд — **FastAPI + SQLAlchemy 2.0 + Alembic + Postgres**;
+> фронтенд — SPA на **React + TypeScript (Vite)**.
 
-## Demo
+## Демо
 
-<!-- INLINE PLAYER — GitHub renders a <video> player when a GitHub-hosted asset
-     URL sits on its own line. To create one (can't be generated locally):
-       1. Push this repo to GitHub.
-       2. On GitHub, open a new Issue (or PR), drag `frontend/e2e/dual-demo-1080.mp4`
-          into the comment box, and wait for the upload to finish.
-       3. Copy the generated `https://github.com/user-attachments/assets/<id>` URL.
-       4. Paste it on the blank line below — bare URL, its own line. No need to
-          submit the issue.
-     Notes: ~10 MB upload limit (the file is 1.6 MB); the player renders only on
-     github.com (not in local/VS Code previews); GitHub shows play-button controls
-     (it never autoplays). You can then delete the fallback thumbnail below. -->
+<!-- ВСТРОЕННЫЙ ПЛЕЕР — GitHub рисует <video>-плеер, когда на отдельной строке
+     стоит ссылка на ассет, размещённый на GitHub. Как её получить (локально
+     сгенерировать нельзя):
+       1. Запушить репозиторий на GitHub.
+       2. На GitHub открыть новый Issue (или PR), перетащить
+          `frontend/e2e/dual-demo-1080.mp4` в поле комментария и дождаться загрузки.
+       3. Скопировать полученную ссылку `https://github.com/user-attachments/assets/<id>`.
+       4. Вставить её на пустой строке ниже — одна «голая» ссылка, отдельной строкой.
+          Сам Issue отправлять не нужно.
+     Примечания: лимит загрузки ~10 МБ (файл весит 1.6 МБ); плеер отображается
+     только на github.com (не в локальном предпросмотре/VS Code); GitHub показывает
+     кнопку воспроизведения (автовоспроизведения нет). После этого запасную
+     миниатюру ниже можно удалить. -->
 
-<!-- ⬇ paste the GitHub video URL on the blank line directly below ⬇ -->
+<!-- ⬇ вставьте ссылку на видео GitHub на пустой строке прямо ниже ⬇ -->
 
 
-▶️ **[Full video — direct link](https://pub-56a06514013f448db8c808889cc73bff.r2.dev/dual-demo-1080.mp4)** · side-by-side: the Adrobot SPA (left) drives the **real** Keitaro stand while the KT emulator (right) reacts live — create campaign → auto-rebalance weights → pin %, add offers, **bring-back (local)**, and **reverse-sync** (an offer deleted directly in Keitaro, detected on fetch).
+▶️ **[Полное видео — прямая ссылка](https://pub-56a06514013f448db8c808889cc73bff.r2.dev/dual-demo-1080.mp4)** · запись в две панели: слева SPA Adrobot управляет **реальным** стендом Keitaro, а справа эмулятор KT реагирует вживую — создание кампании → автопересчёт долей → закрепление %, добавление офферов, **возврат (локально)** и **обратная синхронизация** (оффер, удалённый прямо в Keitaro и обнаруженный при обновлении).
 
-<!-- Fallback thumbnail (renders everywhere; click → full video). Remove once the inline player above is in place. -->
-[![Adrobot demo — SPA (left) driving the real Keitaro stand, KT emulator (right) reacting live](docs/assets/dual-demo-preview.png)](https://pub-56a06514013f448db8c808889cc73bff.r2.dev/dual-demo-1080.mp4)
+<!-- Запасная миниатюра (отображается везде; клик → полное видео). Удалите, когда встроите плеер выше. -->
+[![Демо Adrobot — слева SPA управляет реальным стендом Keitaro, справа эмулятор KT реагирует вживую](docs/assets/dual-demo-preview.png)](https://pub-56a06514013f448db8c808889cc73bff.r2.dev/dual-demo-1080.mp4)
 
-## Status
+## Статус
 
-Implemented. Backend: FastAPI + SQLAlchemy + Alembic, 44 service/API tests all green
-(incl. a 500-case property/fuzz suite over the weight math).
-Frontend: React + TypeScript SPA (Vite), deployed to GitHub Pages.
+Реализовано. Бэкенд: FastAPI + SQLAlchemy + Alembic, все 44 сервисных/API-теста
+проходят (включая property/fuzz-набор из 500 случаев на математику долей).
+Фронтенд: SPA на React + TypeScript (Vite), разворачивается на GitHub Pages.
 
-## Docs
+## Документация
 
-| File | What |
-|------|------|
-| [`docs/task-ru.md`](./docs/task-ru.md) | Original task (RU) |
-| [`docs/api-reference.md`](./docs/api-reference.md) | **Verified** test-stand API reference |
-| [`docs/test-stand-ru.md`](./docs/test-stand-ru.md) | Test-stand (emulator) access notes |
-| [`docs/admin-api.openapi.json`](./docs/admin-api.openapi.json) | Keitaro Admin API OpenAPI spec |
-| [`docs/superpowers/specs/2026-11-26-adrobot-design.md`](./docs/superpowers/specs/2026-11-26-adrobot-design.md) | Design spec |
-| [`docs/superpowers/plans/2026-11-26-adrobot-implementation.md`](./docs/superpowers/plans/2026-11-26-adrobot-implementation.md) | TDD implementation plan |
+| Файл | Что это |
+|------|---------|
+| [`docs/task-ru.md`](./docs/task-ru.md) | Исходное задание (RU) |
+| [`docs/api-reference.md`](./docs/api-reference.md) | **Проверенный** справочник API тест-стенда |
+| [`docs/test-stand-ru.md`](./docs/test-stand-ru.md) | Заметки по доступу к тест-стенду (эмулятору) |
+| [`docs/admin-api.openapi.json`](./docs/admin-api.openapi.json) | OpenAPI-спецификация Keitaro Admin API |
+| [`docs/superpowers/specs/2026-11-26-adrobot-design.md`](./docs/superpowers/specs/2026-11-26-adrobot-design.md) | Спецификация дизайна |
+| [`docs/superpowers/plans/2026-11-26-adrobot-implementation.md`](./docs/superpowers/plans/2026-11-26-adrobot-implementation.md) | План реализации (TDD) |
 
-## Run
+## Запуск
 
-### 1. Database (Postgres via Docker)
+### 1. База данных (Postgres через Docker)
 
 ```bash
 docker compose up -d
 ```
 
-> If local port 5432 is taken, set `PG_PORT` in `docker-compose.yml` and update
-> `DATABASE_URL` in `backend/.env` to match.
+> Если локальный порт 5432 занят, задайте `PG_PORT` в `docker-compose.yml` и
+> обновите `DATABASE_URL` в `backend/.env` соответственно.
 
-### 2. Backend
+### 2. Бэкенд
 
 ```bash
 cd backend
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env            # paste your Keitaro Api-Key
-alembic upgrade head            # run migrations
+cp .env.example .env            # вставьте свой Keitaro Api-Key
+alembic upgrade head            # применить миграции
 uvicorn app.main:app --reload   # http://localhost:8000
 ```
 
-### 3. Frontend
+### 3. Фронтенд
 
 ```bash
 cd frontend
@@ -83,35 +86,37 @@ cp .env.example .env            # VITE_API_URL=http://localhost:8000
 npm run dev                     # http://localhost:5173
 ```
 
-### Tests
+### Тесты
 
 ```bash
 cd backend && . .venv/bin/activate && pytest
 ```
 
-## Part 1 / Part 2
+## Часть 1 / Часть 2
 
-- **Create** tab: name + countries + offer → campaign with 2 streams (geo→Google, offer).
-- **Editor** tab: pick a campaign → Fetch Streams → add/remove/pin offers,
-  Push/Cancel. Yellow = unpublished; gray = removed (the badge's tooltip says whether
-  it was removed locally or in Keitaro).
+- Вкладка **Create**: название + страны + оффер → кампания с 2 потоками
+  (гео→Google, оффер).
+- Вкладка **Editor**: выбрать кампанию → Fetch Streams → добавить/удалить/закрепить
+  офферы, Push/Cancel. Жёлтый = не опубликовано; серый = удалён (подсказка на бейдже
+  показывает, удалён он локально или в Keitaro).
 
-## How AI agents were used
+## Как использовались ИИ-агенты
 
-This project was developed with Claude Code using a spec-driven workflow
-(brainstorming → spec → plan → TDD). The resulting spec and implementation plan
-are tracked under [`docs/superpowers/`](./docs/superpowers); the agent's project
-instructions are in [`CLAUDE.md`](./CLAUDE.md).
+Проект разработан с помощью Claude Code по спек-ориентированному процессу
+(брейншторм → спецификация → план → TDD). Итоговая спецификация и план реализации
+лежат в [`docs/superpowers/`](./docs/superpowers); инструкции агента для проекта —
+в [`CLAUDE.md`](./CLAUDE.md).
 
-AI agents were also used to:
+ИИ-агенты также использовались, чтобы:
 
-- **Write the tests** — the backend pytest suite (44 service/API tests, TDD) and
-  the Playwright end-to-end browser tests
-  ([`frontend/e2e/`](./frontend/e2e)) that drive the real SPA against a demo backend.
-- **Produce the video screencast** — the side-by-side [demo](#demo) above is
-  generated by a Playwright harness
+- **Написать тесты** — набор pytest на бэкенде (44 сервисных/API-теста, TDD) и
+  end-to-end браузерные тесты на Playwright
+  ([`frontend/e2e/`](./frontend/e2e)), которые гоняют реальный SPA против
+  демо-бэкенда.
+- **Снять видео-скринкаст** — демо в две панели [выше](#демо) генерируется
+  Playwright-харнессом
   ([`frontend/e2e/dual-record.dual.ts`](./frontend/e2e/dual-record.dual.ts)):
-  it records the Adrobot SPA and the live Keitaro emulator as two panes, then
-  composites them into one 1080p video with ffmpeg
-  ([`frontend/scripts/merge-lr.sh`](./frontend/scripts/merge-lr.sh)) — captions,
-  cursor/click overlays, and all.
+  он записывает SPA Adrobot и живой эмулятор Keitaro как две панели, затем
+  склеивает их в одно видео 1080p через ffmpeg
+  ([`frontend/scripts/merge-lr.sh`](./frontend/scripts/merge-lr.sh)) — с
+  подписями, курсором и анимацией кликов.
