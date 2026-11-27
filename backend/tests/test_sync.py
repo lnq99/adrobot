@@ -94,6 +94,33 @@ async def test_local_removal_not_relabelled_on_fetch(db, keitaro):
 
 
 @pytest.mark.asyncio
+async def test_fetch_imports_offer_added_in_keitaro(db, keitaro):
+    """An offer added directly in Keitaro must be imported on fetch so a later
+    push does not silently delete it."""
+    from app.keitaro.base import KOffer
+    from app.services.publisher import push_stream
+
+    camp = await create_campaign(db, keitaro, name="test_quang_s6",
+                                 geos=["GM"], offer_id=18001)
+    offers_stream = next(s for s in camp.streams if s.kind == "offers")
+    # Admin adds 18002 directly in Keitaro (behind the app's back).
+    await keitaro.update_stream_offers(
+        offers_stream.keitaro_stream_id, [KOffer(18001, 60), KOffer(18002, 40)])
+
+    await fetch_campaign(db, keitaro, camp)
+
+    by_id = {o.keitaro_offer_id: o for o in offers_stream.offers}
+    assert 18002 in by_id
+    assert by_id[18002].status == "active" and by_id[18002].origin == "keitaro"
+
+    # A subsequent push keeps 18002 (it is not dropped from Keitaro).
+    await push_stream(db, keitaro, offers_stream)
+    kstreams = await keitaro.get_campaign_streams(camp.keitaro_campaign_id)
+    pushed = next(s for s in kstreams if s.id == offers_stream.keitaro_stream_id)
+    assert sorted(o.offer_id for o in pushed.offers) == [18001, 18002]
+
+
+@pytest.mark.asyncio
 async def test_fetch_multiple_removals_rebalances(db, keitaro):
     """Two offers deleted upstream at once → both REM, survivor totals 100."""
     from app.services import editor

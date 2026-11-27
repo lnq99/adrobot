@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_keitaro
+from app.api._serialize import stream_to_out
 from app.core.errors import NotFoundError
 from app.schemas import CampaignOut, CreateCampaignIn, StreamOut
 from app.services.creator import create_campaign
@@ -17,12 +18,7 @@ def _campaign_out(c: models.Campaign) -> CampaignOut:
 
 
 def _streams_out(c: models.Campaign) -> list[StreamOut]:
-    return [StreamOut(
-        id=s.id, keitaro_stream_id=s.keitaro_stream_id, position=s.position,
-        kind=s.kind, is_dirty=s.is_dirty,
-        offers=[{"keitaro_offer_id": o.keitaro_offer_id, "offer_name": o.offer_name,
-                 "share": o.share, "status": o.status, "origin": o.origin,
-                 "pinned": o.pinned} for o in s.offers]) for s in c.streams]
+    return [stream_to_out(s) for s in c.streams]
 
 
 def _get(db: Session, campaign_id: int) -> models.Campaign:

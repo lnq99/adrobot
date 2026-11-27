@@ -60,6 +60,10 @@ async def create_campaign(db: Session, keitaro: KeitaroPort, *,
     offers_stream.offers.append(models.OfferState(
         keitaro_offer_id=offer_id, offer_name=offer.get("name", ""),
         share=100, status="active", published_share=100))
+    # Baseline for Cancel: the stream was just created in Keitaro with this offer.
+    offers_stream.published_snapshot = [{
+        "offer_id": offer_id, "offer_name": offer.get("name", ""),
+        "share": 100, "status": "active", "origin": "local", "pinned": False}]
     campaign.streams.append(offers_stream)
     db.commit()
     return campaign

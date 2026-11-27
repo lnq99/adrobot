@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_keitaro
+from app.api._serialize import stream_to_out as _out
 from app.core.errors import NotFoundError, ValidationError
 from app.schemas import AddOfferIn, PinIn, StreamOut
 from app.services import editor
@@ -18,15 +19,6 @@ def _get(db: Session, stream_id: int) -> models.Stream:
     if s.kind != "offers":
         raise ValidationError("stream has no editable offers")
     return s
-
-
-def _out(s: models.Stream) -> StreamOut:
-    return StreamOut(
-        id=s.id, keitaro_stream_id=s.keitaro_stream_id, position=s.position,
-        kind=s.kind, is_dirty=s.is_dirty,
-        offers=[{"keitaro_offer_id": o.keitaro_offer_id, "offer_name": o.offer_name,
-                 "share": o.share, "status": o.status, "origin": o.origin,
-                 "pinned": o.pinned} for o in s.offers])
 
 
 @router.post("/{stream_id}/offers", response_model=StreamOut)
