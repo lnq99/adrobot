@@ -92,6 +92,20 @@ npm run dev                     # http://localhost:5173
 cd backend && . .venv/bin/activate && pytest
 ```
 
+## Фронтенд на GitHub Pages
+
+Собранный SPA живёт на [`lnq99.github.io/adrobot`](https://lnq99.github.io/adrobot),
+а бэкенд каждый пользователь запускает у себя локально. Браузер резолвит
+`localhost` на машине пользователя, поэтому страница с Pages обращается к
+`http://localhost:8000` — то есть к вашему собственному бэкенду.
+
+- `http://localhost` считается доверённым источником, поэтому запрос с HTTPS-страницы
+  на HTTP-localhost браузеры не блокируют (HTTPS на бэкенде не нужен).
+- Origin Pages (`https://lnq99.github.io`, без пути) уже добавлен в `CORS_ORIGINS`.
+- Если Chrome заблокирует preflight по Private Network Access, бэкенду нужно вернуть
+  заголовок `Access-Control-Allow-Private-Network: true` (добавляется при
+  необходимости).
+
 ## Часть 1 / Часть 2
 
 - Вкладка **Create**: название + страны + оффер → кампания с 2 потоками

@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     keitaro_domain_id: int = 1813
     keitaro_group_id: int = 10332
     keitaro_source_id: int = 836
-    cors_origins: str = "http://localhost:5173,http://localhost:4173"
+    cors_origins: str = (
+        "http://localhost:5173,http://localhost:4173,https://lnq99.github.io")
     use_fake_keitaro: bool = False
 
     @property
