@@ -70,3 +70,49 @@ async def test_push_succeeds_after_rem_fetch(db, keitaro):
     kstreams = await keitaro.get_campaign_streams(camp.keitaro_campaign_id)
     pushed = next(s for s in kstreams if s.id == offers_stream.keitaro_stream_id)
     assert [o.offer_id for o in pushed.offers] == [18001]
+
+
+@pytest.mark.asyncio
+async def test_local_removal_not_relabelled_on_fetch(db, keitaro):
+    """Reverse-sync must only touch offers gone *upstream*. An offer removed
+    locally (origin=local) and still present in Keitaro stays origin=local on
+    fetch — it is not resurrected, nor relabelled as a Keitaro removal."""
+    from app.services import editor
+    from app.services.publisher import push_stream
+
+    camp = await create_campaign(db, keitaro, name="test_quang_s4",
+                                 geos=["GM"], offer_id=18001)
+    offers_stream = next(s for s in camp.streams if s.kind == "offers")
+    editor.add_offer(db, offers_stream, offer_id=18002, offer_name="B")
+    await push_stream(db, keitaro, offers_stream)          # Keitaro: 18001, 18002
+    editor.remove_offer(db, offers_stream, offer_id=18002)  # local-only removal (not pushed)
+
+    await fetch_campaign(db, keitaro, camp)                 # 18002 still exists upstream
+
+    o = next(x for x in offers_stream.offers if x.keitaro_offer_id == 18002)
+    assert o.status == "removed" and o.origin == "local"
+
+
+@pytest.mark.asyncio
+async def test_fetch_multiple_removals_rebalances(db, keitaro):
+    """Two offers deleted upstream at once → both REM, survivor totals 100."""
+    from app.services import editor
+    from app.services.publisher import push_stream
+
+    camp = await create_campaign(db, keitaro, name="test_quang_s5",
+                                 geos=["GM"], offer_id=18001)
+    offers_stream = next(s for s in camp.streams if s.kind == "offers")
+    editor.add_offer(db, offers_stream, offer_id=18002, offer_name="B")
+    editor.add_offer(db, offers_stream, offer_id=18003, offer_name="C")
+    await push_stream(db, keitaro, offers_stream)          # Keitaro: 3 offers
+
+    keitaro.admin_remove_offer(offers_stream.keitaro_stream_id, 18002)
+    keitaro.admin_remove_offer(offers_stream.keitaro_stream_id, 18003)
+    await fetch_campaign(db, keitaro, camp)
+
+    by_id = {o.keitaro_offer_id: o for o in offers_stream.offers}
+    assert by_id[18002].status == "removed" and by_id[18002].origin == "keitaro"
+    assert by_id[18003].status == "removed" and by_id[18003].origin == "keitaro"
+    active = [o for o in offers_stream.offers if o.status == "active"]
+    assert [o.keitaro_offer_id for o in active] == [18001]
+    assert sum(o.share for o in active) == 100

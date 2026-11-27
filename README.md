@@ -37,7 +37,8 @@ constructor), built for the Adrobot test task. Two parts:
 
 ## Status
 
-Implemented. Backend: FastAPI + SQLAlchemy + Alembic, 29 service/API tests all green.
+Implemented. Backend: FastAPI + SQLAlchemy + Alembic, 44 service/API tests all green
+(incl. a 500-case property/fuzz suite over the weight math).
 Frontend: React + TypeScript SPA (Vite), deployed to GitHub Pages.
 
 ## Docs
@@ -104,7 +105,7 @@ instructions are in [`CLAUDE.md`](./CLAUDE.md).
 
 AI agents were also used to:
 
-- **Write the tests** — the backend pytest suite (29 service/API tests, TDD) and
+- **Write the tests** — the backend pytest suite (44 service/API tests, TDD) and
   the Playwright end-to-end browser tests
   ([`frontend/e2e/`](./frontend/e2e)) that drive the real SPA against a demo backend.
 - **Produce the video screencast** — the side-by-side [demo](#demo) above is

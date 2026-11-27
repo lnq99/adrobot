@@ -1,5 +1,6 @@
 import pytest
 
+from app.core.errors import NotFoundError, ValidationError
 from app.services import editor
 from app.services.creator import create_campaign
 from app import models
@@ -74,3 +75,33 @@ async def test_pin_sets_value_and_dirties_only_on_value(db, keitaro):
     others = sorted(o.share for o in stream.offers if not o.pinned)
     assert others == [30, 30]
     assert stream.is_dirty is True
+
+
+@pytest.mark.asyncio
+async def test_add_duplicate_active_rejected(db, keitaro):
+    """Adding an offer that is already active is a 422, not a silent no-op."""
+    _, stream = await _campaign_with_offers_stream(db, keitaro)  # 18001 active
+    with pytest.raises(ValidationError):
+        editor.add_offer(db, stream, offer_id=18001, offer_name="dup")
+
+
+@pytest.mark.asyncio
+async def test_pin_removed_offer_rejected(db, keitaro):
+    """Only active offers can be pinned; pinning a removed one is a 422."""
+    _, stream = await _campaign_with_offers_stream(db, keitaro)
+    editor.add_offer(db, stream, offer_id=18002, offer_name="B")
+    editor.remove_offer(db, stream, offer_id=18002)
+    with pytest.raises(ValidationError):
+        editor.pin(db, stream, offer_id=18002, pinned=True, share=50)
+
+
+@pytest.mark.asyncio
+async def test_ops_on_unknown_offer_raise_not_found(db, keitaro):
+    """remove / bring_back / pin on an offer id not in the stream → 404."""
+    _, stream = await _campaign_with_offers_stream(db, keitaro)
+    with pytest.raises(NotFoundError):
+        editor.remove_offer(db, stream, offer_id=99999)
+    with pytest.raises(NotFoundError):
+        editor.bring_back(db, stream, offer_id=99999)
+    with pytest.raises(NotFoundError):
+        editor.pin(db, stream, offer_id=99999, pinned=True, share=10)
