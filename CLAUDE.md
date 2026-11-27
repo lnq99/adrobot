@@ -38,7 +38,10 @@ Implementation plan: [`docs/superpowers/plans/2026-11-26-adrobot-implementation.
   - Pin/unpin **toggle** → NOT dirty. **Editing a pinned share value** → dirty.
 - **Dirty** stream = unpublished changes (UI shows yellow).
 - **Conflict detection:** on Push, compare a stored signature (hash of the last-seen
-  Keitaro offer set) against Keitaro's current state; mismatch → **409**, re-fetch.
+  Keitaro offer set + state) against Keitaro's current state; mismatch → **409**, re-fetch.
+- **Fetch is two-way:** offers gone upstream → REM (reverse-sync); offers *added*
+  upstream → imported as active, so a later Push never silently deletes them. Fetch
+  also records a baseline so Cancel can restore the last published state.
 
 ## The two hardest requirements (don't skip — they separate pass/fail)
 1. **Reverse-sync** — offer deleted directly in Keitaro → on fetch, mark it
