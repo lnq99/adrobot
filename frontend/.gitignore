@@ -28,3 +28,6 @@ test-results/
 playwright-report/
 /e2e.db
 *.db
+# Captured Keitaro admin login session (secret) + composited demo video
+e2e/.auth/
+e2e/*.mp4

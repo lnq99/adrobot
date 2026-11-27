@@ -29,9 +29,10 @@ Implementation plan: [`docs/superpowers/plans/2026-11-26-adrobot-implementation.
 
 ## Core domain model
 - **Offer status:** `active | removed`, plus `origin: local | keitaro`.
-  A `removed` offer with `origin="keitaro"` is the **REM** case (deleted upstream,
-  detected on fetch) and gets a REM badge. Both origins are gray, share 0, and
-  support **Bring back**.
+  A `removed` offer with `origin="keitaro"` was deleted upstream in Keitaro and
+  detected on fetch (the reverse-sync case). Both origins render a single gray
+  `Removed` badge — the tooltip notes whether it was removed locally or in Keitaro.
+  Both are share 0 and support **Bring back**.
 - **Pinned = user-controlled share.** A pinned offer's % is set by the user and
   held fixed; unpinned active offers evenly split the remainder.
   - Pin/unpin **toggle** → NOT dirty. **Editing a pinned share value** → dirty.
@@ -40,7 +41,7 @@ Implementation plan: [`docs/superpowers/plans/2026-11-26-adrobot-implementation.
   Keitaro offer set) against Keitaro's current state; mismatch → **409**, re-fetch.
 
 ## The two hardest requirements (don't skip — they separate pass/fail)
-1. **Reverse-sync REM** — offer deleted directly in Keitaro → on fetch, mark it
+1. **Reverse-sync** — offer deleted directly in Keitaro → on fetch, mark it
    `removed/origin=keitaro` (gray) locally, do NOT hard-delete; keep "Bring back".
 2. **Pinned weights** — pinned offer's share fixed; others rebalance to fill 100%.
 

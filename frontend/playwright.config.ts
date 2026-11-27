@@ -2,6 +2,8 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
+  // The side-by-side demo (*.dual.ts) has its own config + real-stand backend.
+  testIgnore: /.*\.dual\.ts/,
   // Slow the browser down so the recorded video is watchable as a demo.
   // Override for fast runs with E2E_SLOWMO=0.
   use: {

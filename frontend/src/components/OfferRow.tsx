@@ -15,7 +15,6 @@ export default function OfferRow({
   onPin: (pinned: boolean, share: number | null) => void;
 }) {
   const removed = offer.status === "removed";
-  const isRemKeitaro = removed && offer.origin === "keitaro";
 
   return (
     <TableRow className={removed ? "opacity-60" : ""}>
@@ -44,10 +43,17 @@ export default function OfferRow({
       {/* Status */}
       <TableCell>
         <div className="flex items-center gap-1">
-          {isRemKeitaro ? (
-            <Badge variant="secondary">REM</Badge>
-          ) : removed ? (
-            <Badge variant="secondary">removed</Badge>
+          {removed ? (
+            <Badge
+              variant="secondary"
+              title={
+                offer.origin === "keitaro"
+                  ? "Removed in Keitaro (detected on fetch)"
+                  : "Removed locally"
+              }
+            >
+              Removed
+            </Badge>
           ) : (
             <Badge variant="success">active</Badge>
           )}
@@ -59,7 +65,7 @@ export default function OfferRow({
       <TableCell>
         <div className="flex gap-1">
           {removed ? (
-            <Button size="sm" variant="outline" onClick={onBringBack}>
+            <Button size="sm" variant="outline" className="w-24" onClick={onBringBack}>
               Bring back
             </Button>
           ) : (
@@ -67,11 +73,12 @@ export default function OfferRow({
               <Button
                 size="sm"
                 variant={offer.pinned ? "secondary" : "outline"}
+                className="w-24"
                 onClick={() => onPin(!offer.pinned, offer.pinned ? null : offer.share)}
               >
                 {offer.pinned ? "📌 Unpin" : "Pin"}
               </Button>
-              <Button size="sm" variant="destructive" onClick={onRemove}>
+              <Button size="sm" variant="destructive" className="w-24" onClick={onRemove}>
                 Remove
               </Button>
             </>

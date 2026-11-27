@@ -30,8 +30,12 @@ test("create campaign and edit stream offers", async ({ page }) => {
   // Name
   await page.getByRole("textbox", { name: "Name", exact: true }).fill("e2e_test_campaign");
 
-  // Country multi-select
-  await page.getByRole("listbox").selectOption({ value: "GM" });
+  // Country multi-select: searchable dropdown with per-item checkboxes
+  await page.getByRole("textbox", { name: "Countries" }).click();
+  await page.getByRole("textbox", { name: "Search countries" }).fill("Gambia");
+  await page.getByRole("checkbox", { name: /Gambia/ }).check();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("textbox", { name: "Countries" })).toHaveValue(/GM/);
 
   // Offer picker: search 18001 and pick it
   await page.getByPlaceholder("offer id or name").fill("18001");

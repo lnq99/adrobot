@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "e2e:auth": "node e2e/auth.capture.mjs",
+    "e2e:dual": "playwright test -c playwright.dual.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.5.0",
